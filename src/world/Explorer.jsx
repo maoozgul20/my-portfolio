@@ -47,21 +47,35 @@ export function Explorer() {
     const dt = Math.min(dtRaw, 0.05)
     const st = s.current
     const time = state.clock.elapsedTime
-    const t = journey.t
+    // The explorer keeps their own place on the path and walks toward where
+    // the camera is, at walking pace, however fast the page is scrolled.
+    const WALK = 4.2 // world units per second
+    const LEASH = 0.24 // furthest they may fall behind, in stations
+    if (env.reduced || st.et === undefined) st.et = journey.t
+    const gap = journey.t - st.et
+    const dir = Math.sign(gap) || 1
+    pathAt(st.et, here)
+    pathAt(st.et + 0.01 * dir, ahead)
+    const perT = Math.max(here.distanceTo(ahead) * 100, 1) // units per station here
+    let step = Math.min(Math.abs(gap), (WALK * dt) / perT)
+    // too far behind (off screen): close the extra distance quickly
+    const excess = Math.abs(gap) - step - LEASH
+    if (excess > 0) step += excess * Math.min(1, dt * 6)
+    st.et += step * dir
+    const t = st.et
 
     pathAt(t, here)
     const moved = here.distanceTo(root.current.position)
     root.current.position.copy(here)
 
-    const moving = Math.abs(journey.speed) > 0.035 && !env.reduced
+    const moving = Math.abs(gap) > 0.004 && !env.reduced
     st.walk = THREE.MathUtils.damp(st.walk, moving ? 1 : 0, 6, dt)
-    // stride follows ground actually covered, so feet do not skate
-    st.phase += Math.min(moved, 1.2) * 2.6 * st.walk
+    // stride follows ground covered, capped at walking pace so legs never race
+    st.phase += Math.min(moved, WALK * dt * 1.15) * 1.5 * st.walk
 
     // heading: along the path while walking; toward the display when stopped
     let want
     if (st.walk > 0.4) {
-      const dir = Math.sign(journey.speed) || 1
       pathAt(t + 0.02 * dir, ahead)
       tmp.subVectors(ahead, here)
       want = Math.atan2(tmp.x, tmp.z)
