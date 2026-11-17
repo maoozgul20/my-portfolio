@@ -34,7 +34,7 @@ const R = ({ as: Tag = 'div', children, ...p }) => (
 export function Hero() {
   return (
     <Station id="home" label="Introduction" className="md:!items-center" wide>
-      <div data-hero>
+      <div data-hero className="world-copy">
         <p className="kicker text-shadow" data-hero-line>
           Hello, I&rsquo;m
         </p>
@@ -48,7 +48,7 @@ export function Hero() {
           </span>{' '}
           <span className="inline-block whitespace-nowrap" aria-hidden="true">
             {[...profile.last].map((c, i) => (
-              <span key={i} data-letter className="inline-block text-cyan [text-shadow:0_0_34px_rgba(0,229,255,0.55),0_2px_24px_rgba(3,9,20,0.85)]">
+              <span key={i} data-letter className="inline-block name-accent text-cyan">
                 {c}
               </span>
             ))}
@@ -96,7 +96,7 @@ export function Hero() {
       </div>
 
       <button data-hero-line onClick={() => goTo('about')} className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-mute md:flex" aria-label="Scroll to continue">
-        <span className="scroll-cue block h-9 w-[22px] rounded-full border border-white/40" />
+        <span className="scroll-cue block h-9 w-[22px] rounded-full border border-ink/40" />
         Scroll
       </button>
     </Station>
@@ -267,7 +267,7 @@ export function Skills() {
                       onPointerLeave={() => set({ hoverSkill: null })}
                       onFocus={() => set({ hoverSkill: s.name })}
                       onBlur={() => set({ hoverSkill: null })}
-                      className={`chip !px-3.5 !py-1.5 !text-[0.8rem] transition-all ${on ? '!border-cyan !bg-cyan/20 !text-white shadow-[0_0_20px_-6px_#00e5ff]' : hover === s.name ? '!border-cyan/70 !text-white' : 'hover:!border-cyan/70'}`}
+                      className={`chip !px-3.5 !py-1.5 !text-[0.8rem] transition-all ${on ? '!border-cyan !bg-cyan/20 !text-ink shadow-[0_0_20px_-6px_#00e5ff]' : hover === s.name ? '!border-cyan/70 !text-ink' : 'hover:!border-cyan/70'}`}
                     >
                       {s.name}
                     </button>
@@ -370,7 +370,7 @@ export function Research() {
 export function Contact() {
   return (
     <Station id="contact" label="Contact" className="!pb-6">
-      <div>
+      <div className="world-copy">
         <R as="p" className="kicker text-shadow">
           Contact · Final destination
         </R>

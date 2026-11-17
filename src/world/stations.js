@@ -66,7 +66,8 @@ export const sideAt = (t) => {
 }
 
 // Atmosphere per station: sky top, horizon, fog colour, fog density, stars, sun.
-const A = (top, hor, fog, density, stars, sun = 0) => ({
+const A = (top, hor, fog, density, stars, sun = 0, day = 1) => ({
+  day,
   top: new THREE.Color(top),
   hor: new THREE.Color(hor),
   fog: new THREE.Color(fog),
@@ -80,15 +81,16 @@ export const atmos = [
   A('#03101c', '#0a4b5c', '#062531', 0.0125, 0.5),
   A('#060a24', '#1d2c6a', '#0a1232', 0.0125, 0.7),
   A('#03121a', '#0a4d46', '#052622', 0.0125, 0.5),
-  A('#010208', '#0b1030', '#02040d', 0.0055, 1.7),
+  A('#010208', '#0b1030', '#02040d', 0.0055, 1.7, 0, 0.45),
   A('#020610', '#06263c', '#030d1a', 0.013, 0.6),
   A('#040a1a', '#0d2e4c', '#06192c', 0.0115, 0.7),
   A('#050a1e', '#152c58', '#081630', 0.0115, 0.8),
   A('#121a4c', '#ff9a66', '#33284a', 0.0058, 0.6, 1),
 ]
 
-const _c = { top: new THREE.Color(), hor: new THREE.Color(), fog: new THREE.Color(), density: 0, stars: 0, sun: 0 }
-export function atmosAt(t) {
+const _c = { top: new THREE.Color(), hor: new THREE.Color(), fog: new THREE.Color(), density: 0, stars: 0, sun: 0, day: 0 }
+const DAY = { top: new THREE.Color('#2f78c4'), hor: new THREE.Color('#bfe6fa'), fog: new THREE.Color('#8fc4e2') }
+export function atmosAt(t, light = 0) {
   t = clampT(t)
   const i = Math.min(Math.floor(t), N - 2)
   const f = THREE.MathUtils.smoothstep(t - i, 0.1, 0.9)
@@ -100,6 +102,17 @@ export function atmosAt(t) {
   _c.density = THREE.MathUtils.lerp(a.density, b.density, f)
   _c.stars = THREE.MathUtils.lerp(a.stars, b.stars, f)
   _c.sun = THREE.MathUtils.lerp(a.sun, b.sun, f)
+  // light theme: the same world by day (deep space stays dusky)
+  const d = light * THREE.MathUtils.lerp(a.day, b.day, f)
+  _c.day = d
+  if (d > 0) {
+    const keep = 1 - _c.sun * 0.55 // let the sunset keep its colour
+    _c.top.lerp(DAY.top, d * 0.9)
+    _c.hor.lerp(DAY.hor, d * 0.85 * keep)
+    _c.fog.lerp(DAY.fog, d * 0.85 * keep)
+    _c.stars *= 1 - d
+    _c.density *= 1 - d * 0.55
+  }
   return _c
 }
 

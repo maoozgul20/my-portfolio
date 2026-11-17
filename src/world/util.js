@@ -39,6 +39,11 @@ export function labelTexture(text, { color = '#F4F8FF', size = 44, weight = 600,
     g.font = font
     g.textBaseline = 'middle'
     g.textAlign = 'center'
+    // dark outline keeps labels readable against a night or a day sky
+    g.lineJoin = 'round'
+    g.lineWidth = Math.max(4, size * 0.16)
+    g.strokeStyle = 'rgba(3,14,26,0.85)'
+    g.strokeText(text, w / 2, h / 2 + 2)
     g.fillStyle = color
     g.fillText(text, w / 2, h / 2 + 2)
   })
@@ -56,13 +61,26 @@ export const C = {
 }
 
 // Holographic material: fresnel rim + scanlines, additive.
+const holos = new Set()
+let holoLight = false
+// Additive holograms vanish against a bright sky, so by day they switch to a
+// tinted-glass look with normal blending.
+export function setHoloLight(on) {
+  holoLight = on
+  for (const m of holos) {
+    m.blending = on ? THREE.NormalBlending : THREE.AdditiveBlending
+    m.uniforms.uLight.value = on ? 1 : 0
+    m.needsUpdate = true
+  }
+}
+
 export function holoMaterial(color = C.cyan, opacity = 1) {
-  return new THREE.ShaderMaterial({
+  const m = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending,
-    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: { value: 0 }, uOpacity: { value: opacity } },
+    blending: holoLight ? THREE.NormalBlending : THREE.AdditiveBlending,
+    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: { value: 0 }, uOpacity: { value: opacity }, uLight: { value: holoLight ? 1 : 0 } },
     vertexShader: /* glsl */ `
       varying vec3 vN; varying vec3 vV; varying vec3 vW;
       void main(){
@@ -73,15 +91,18 @@ export function holoMaterial(color = C.cyan, opacity = 1) {
         gl_Position = projectionMatrix * viewMatrix * w;
       }`,
     fragmentShader: /* glsl */ `
-      uniform vec3 uColor; uniform float uTime; uniform float uOpacity;
+      uniform vec3 uColor; uniform float uTime; uniform float uOpacity; uniform float uLight;
       varying vec3 vN; varying vec3 vV; varying vec3 vW;
       void main(){
         float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.0);
         float scan = 0.5 + 0.5 * sin(vW.y * 26.0 - uTime * 2.2);
         float a = (0.12 + f * 0.95 + scan * 0.08) * uOpacity;
-        gl_FragColor = vec4(uColor * (0.5 + f), a);
+        vec3 day = uColor * (0.34 + 0.2 * f);
+        gl_FragColor = vec4(mix(uColor * (0.5 + f), day, uLight), mix(a, clamp(0.34 + f * 0.6 + scan * 0.06, 0.0, 1.0) * uOpacity, uLight));
       }`,
   })
+  holos.add(m)
+  return m
 }
 
 // Pointer events reach the canvas through the page root, so a click on a

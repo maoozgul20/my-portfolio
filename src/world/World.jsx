@@ -47,6 +47,7 @@ export default function World() {
   // ?fx=1 / ?fx=0 forces post-processing on or off
   const forced = new URLSearchParams(location.search).get('fx')
   const [fx, setFx] = useState(forced ? forced === '1' : !env.mobile && !env.reduced)
+  const light = useUI((s) => s.theme === 'light')
   const [dpr, setDpr] = useState(env.mobile ? 1.25 : Math.min(window.devicePixelRatio, 1.6))
   return (
     <Canvas
@@ -117,8 +118,8 @@ export default function World() {
       </Near>
       {fx && (
         <EffectComposer multisampling={0}>
-          <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.62} luminanceSmoothing={0.25} radius={0.72} />
-          <Vignette eskil={false} offset={0.22} darkness={0.72} />
+          <Bloom mipmapBlur intensity={light ? 0.45 : 0.85} luminanceThreshold={light ? 0.9 : 0.62} luminanceSmoothing={0.25} radius={0.72} />
+          <Vignette eskil={false} offset={0.22} darkness={light ? 0.4 : 0.72} />
           <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         </EffectComposer>
       )}

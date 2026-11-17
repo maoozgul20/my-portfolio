@@ -9,6 +9,8 @@ export const Mail = (p) => <I {...p}><rect x="3" y="5" width="18" height="14" rx
 export const Pin = (p) => <I {...p}><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.800 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></I>
 export const Close = (p) => <I {...p}><path d="M6 6l12 12M18 6 6 18" /></I>
 export const Menu = (p) => <I {...p}><path d="M4 7h16M4 12h16M4 17h16" /></I>
+export const Sun = (p) => <I {...p}><circle cx="12" cy="12" r="4" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" /></I>
+export const Moon = (p) => <I {...p}><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" /></I>
 export const Up = (p) => <I {...p}><path d="M12 19V5M6 11l6-6 6 6" /></I>
 export const Cap = (p) => <I {...p}><path d="m2 9 10-5 10 5-10 5L2 9Z" /><path d="M6 11.500V16c0 1.200 2.700 3 6 3s6-1.800 6-3v-4.500M22 9v6" /></I>
 export const Brief = (p) => <I {...p}><rect x="3" y="7" width="18" height="13" rx="2.500" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18" /></I>

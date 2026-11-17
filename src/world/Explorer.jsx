@@ -8,6 +8,7 @@ import { glowTexture } from './util'
 const here = new THREE.Vector3()
 const ahead = new THREE.Vector3()
 const tmp = new THREE.Vector3()
+const WALK = 4.2 // stride reference, world units per second
 
 // The explorer: one stylised character, same look the whole way. Idles
 // (breathing, small weight shifts), walks whenever the journey moves, stops at
@@ -47,32 +48,16 @@ export function Explorer() {
     const dt = Math.min(dtRaw, 0.05)
     const st = s.current
     const time = state.clock.elapsedTime
-    // The explorer keeps their own place on the path and walks toward where
-    // the camera is, at walking pace, however fast the page is scrolled.
-    const WALK = 4.2 // world units per second
-    if (env.reduced || st.et === undefined) st.et = journey.t
-    const gap = journey.t - st.et
-    const dir = Math.sign(gap) || 1
-    pathAt(st.et, here)
-    pathAt(st.et + 0.01 * dir, ahead)
-    const perT = Math.max(here.distanceTo(ahead) * 100, 1) // units per station here
-    let step = Math.min(Math.abs(gap), (WALK * dt) / perT)
-    // Never drop out of the picture: the camera sits about 8 units behind its
-    // spot on the path, so trailing it is allowed only a short way (they jog to
-    // keep up); when the journey reverses they are ahead and may lag further.
-    const leash = (gap > 0 ? 1.6 : 6) / perT
-    const excess = Math.abs(gap) - step - leash
-    if (excess > 0) step += excess * Math.min(1, dt * 12)
-    st.et += step * dir
-    const t = st.et
+    const t = journey.t
+    const dir = Math.sign(journey.speed) || 1
 
     pathAt(t, here)
     const moved = here.distanceTo(root.current.position)
     root.current.position.copy(here)
 
-    const moving = Math.abs(gap) > 0.004 && !env.reduced
+    const moving = Math.abs(journey.speed) > 0.02 && !env.reduced
     st.walk = THREE.MathUtils.damp(st.walk, moving ? 1 : 0, 6, dt)
-    // stride follows ground covered, capped at walking pace so legs never race
+    // stride follows ground covered, capped so the legs never race
     st.phase += Math.min(moved, WALK * dt * 1.7) * 1.5 * st.walk
 
     // heading: along the path while walking; toward the display when stopped

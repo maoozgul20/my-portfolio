@@ -152,14 +152,14 @@ const portalMat = () =>
   })
 
 // A standing ring gate. `openRef` returns 0…1.
-export function Portal({ position, yaw = 0, radius = 2.6, open = () => 1, stones = 9 }) {
+export function Portal({ position, yaw = 0, radius = 2.6, open = () => 1, stones = 9, backing = 0.93 }) {
   const mat = useMemo(portalMat, [])
   const ring = useRef()
   const glow = useRef()
   const back = useRef()
   useFrame((state) => {
     const o = open()
-    back.current.material.opacity = o * 0.93
+    back.current.material.opacity = o * backing * (1 - journey.light * 0.45)
     back.current.scale.setScalar(0.02 + o * 0.98)
     mat.uniforms.uTime.value = env.reduced ? 1 : state.clock.elapsedTime
     mat.uniforms.uOpen.value = 0.02 + o * 0.98
@@ -204,7 +204,7 @@ export function JourneyGate() {
     const q = pathAt(0.52)
     return { pos: [p.x, p.y + 2.5, p.z], yaw: Math.atan2(q.x - p.x, q.z - p.z) }
   }, [])
-  return <Portal position={pos} yaw={yaw} radius={2.7} open={() => THREE.MathUtils.smoothstep(journey.t, 0.02, 0.3)} />
+  return <Portal position={pos} yaw={yaw} radius={2.7} backing={0.6} open={() => THREE.MathUtils.smoothstep(journey.t, 0.02, 0.3)} />
 }
 
 // The last gate, at the end of the path.

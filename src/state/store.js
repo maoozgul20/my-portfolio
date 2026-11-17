@@ -9,6 +9,7 @@ export const useUI = create((set) => ({
   skill: null, // name of the selected skill
   hoverSkill: null,
   webgl: true,
+  theme: (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) || 'dark',
   set,
 }))
 
@@ -22,6 +23,7 @@ export const journey = {
   py: 0,
   intro: 0, // 0 → 1 during the opening shot
   scroll: 0, // whole-page scroll fraction
+  light: 0, // 0 night … 1 day, eased when the theme changes
 }
 
 const mq = (q) => typeof window !== 'undefined' && window.matchMedia(q).matches

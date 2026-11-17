@@ -95,7 +95,7 @@ export function Atmosphere() {
   }, [scene])
 
   useFrame((state) => {
-    const a = atmosAt(journey.t)
+    const a = atmosAt(journey.t, journey.light)
     const time = env.reduced ? 0 : state.clock.elapsedTime
     skyMat.uniforms.uTop.value.copy(a.top)
     skyMat.uniforms.uHor.value.copy(a.hor)
@@ -110,10 +110,10 @@ export function Atmosphere() {
     starMat.uniforms.uPx.value = state.gl.getPixelRatio()
     hemi.current.color.copy(a.hor).lerp(_white, 0.35)
     hemi.current.groundColor.copy(a.fog)
-    hemi.current.intensity = 1.25 * (0.25 + 0.75 * journey.intro)
+    hemi.current.intensity = (1.25 + a.day * 1.5) * (0.25 + 0.75 * journey.intro)
     // key light: cool moonlight, warming to sunset at the end
-    sun.current.color.set('#9fd8ff').lerp(_warm, a.sun)
-    sun.current.intensity = (1.5 + a.sun * 1.2) * (0.2 + 0.8 * journey.intro)
+    sun.current.color.set('#9fd8ff').lerp(_day, a.day).lerp(_warm, a.sun)
+    sun.current.intensity = (1.5 + a.sun * 1.2 + a.day * 1.6) * (0.2 + 0.8 * journey.intro)
     const t = sun.current.target
     t.position.copy(camera.position).add(_fwd.set(0, -2, -10))
     sun.current.position.copy(t.position).add(_off.set(14 - a.sun * 4, 22 - a.sun * 12, 10 - a.sun * 34))
@@ -146,6 +146,7 @@ export function Atmosphere() {
 }
 const _white = new THREE.Color('#ffffff')
 const _warm = new THREE.Color('#ffb072')
+const _day = new THREE.Color('#fff4e0')
 const _fwd = new THREE.Vector3()
 const _off = new THREE.Vector3()
 
@@ -198,6 +199,7 @@ export function Particles() {
     mat.uniforms.uCam.value.copy(state.camera.position)
     mat.uniforms.uPx.value = state.gl.getPixelRatio()
     mat.uniforms.uAmt.value = 0.75 * journey.intro
+    mat.uniforms.uColor.value.set('#7df3ff').lerp(_white, journey.light * 0.7)
   })
   return <points ref={ref} geometry={geo} material={mat} frustumCulled={false} />
 }
@@ -223,6 +225,8 @@ export function Clouds() {
     const t = state.clock.elapsedTime
     group.current.children.forEach((c, i) => {
       c.position.x = items[i].x + Math.sin(t * 0.05 * items[i].v + i) * 6
+      c.material.opacity = items[i].o * (1 + journey.light * 1.4)
+      c.material.color.set('#9fd4ee').lerp(_white, journey.light)
     })
   })
   return (

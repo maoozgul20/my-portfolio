@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useUI, journey } from '../state/store'
 import { goTo } from '../state/useScrollJourney'
 import { navItems, sections, profile } from '../data/content'
-import { Logo, Download, Menu, Close, Up } from './Icons'
+import { Logo, Download, Menu, Close, Up, Sun, Moon } from './Icons'
 
 // station index → the nav item it belongs to (all four projects sit under Projects)
 const navFor = (i) => {
@@ -14,6 +14,8 @@ const navFor = (i) => {
 export function Nav() {
   const active = useUI((s) => s.active)
   const current = navFor(active)
+  const theme = useUI((s) => s.theme)
+  const setUI = useUI((s) => s.set)
   const [open, setOpen] = useState(false)
   const bar = useRef()
 
@@ -35,7 +37,7 @@ export function Nav() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-50 h-[2px] bg-white/5" aria-hidden="true">
+      <div className="fixed inset-x-0 top-0 z-50 h-[2px] bg-ink/5" aria-hidden="true">
         <div ref={bar} className="h-full origin-left bg-gradient-to-r from-cyan to-teal" style={{ transform: 'scaleX(0)' }} />
       </div>
 
@@ -56,7 +58,7 @@ export function Nav() {
                   <button
                     onClick={() => go(n.id)}
                     aria-current={current === n.id ? 'true' : undefined}
-                    className={`relative rounded-full px-4 py-2 text-[0.82rem] font-medium transition-colors ${current === n.id ? 'text-[#021018]' : 'text-ink/80 hover:text-cyan'}`}
+                    className={`relative rounded-full px-4 py-2 text-[0.82rem] font-medium transition-colors ${current === n.id ? 'text-[var(--on-accent)]' : 'text-ink/80 hover:text-cyan'}`}
                   >
                     {current === n.id && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan to-teal shadow-[0_0_24px_-4px_#00e5ff]" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
                     <span className="relative">{n.nav}</span>
@@ -67,6 +69,14 @@ export function Nav() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <button
+              className="glass grid h-[42px] w-[42px] place-items-center rounded-full text-cyan hover:border-cyan"
+              onClick={() => setUI({ theme: theme === 'light' ? 'dark' : 'light' })}
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              aria-pressed={theme === 'light'}
+            >
+              {theme === 'light' ? <Moon /> : <Sun />}
+            </button>
             <a href={profile.cv} download className="btn btn-ghost !min-h-[42px] !px-4 !py-2 text-[0.82rem]">
               <span className="hidden sm:inline">Download</span> CV <Download size={16} />
             </a>
@@ -100,7 +110,7 @@ export function Nav() {
       <div data-ui className="fixed right-5 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex">
         {navItems.map((n) => (
           <button key={n.id} onClick={() => go(n.id)} className="group relative grid h-4 w-4 place-items-center" aria-label={`Go to ${n.nav}`}>
-            <span className={`block rounded-full transition-all duration-300 ${current === n.id ? 'h-2.5 w-2.5 bg-cyan shadow-[0_0_12px_#00e5ff]' : 'h-1.5 w-1.5 bg-white/35 group-hover:bg-cyan'}`} />
+            <span className={`block rounded-full transition-all duration-300 ${current === n.id ? 'h-2.5 w-2.5 bg-cyan shadow-[0_0_12px_#00e5ff]' : 'h-1.5 w-1.5 bg-ink/35 group-hover:bg-cyan'}`} />
             <span className="glass pointer-events-none absolute right-6 rounded-md px-2 py-1 text-[0.68rem] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{n.nav}</span>
           </button>
         ))}

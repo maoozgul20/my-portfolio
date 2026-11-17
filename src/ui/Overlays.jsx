@@ -29,7 +29,7 @@ export function Loader() {
           <div className="flex w-56 flex-col items-center gap-6">
             <Logo size={64} />
             <p className="kicker !text-mute">The journey begins</p>
-            <div className="h-[3px] w-full overflow-hidden rounded bg-white/10">
+            <div className="h-[3px] w-full overflow-hidden rounded bg-ink/10">
               <div className="h-full rounded bg-gradient-to-r from-cyan to-teal transition-[width] duration-300" style={{ width: `${p}%` }} />
             </div>
             <p className="text-xs tabular-nums text-mute">{Math.round(p)}%</p>
@@ -113,7 +113,7 @@ export function ProjectModal() {
   return (
     <AnimatePresence>
       {p && (
-        <motion.div data-ui key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] overflow-y-auto bg-[#02060e]/80 backdrop-blur-md" onClick={() => set({ project: null })}>
+        <motion.div data-ui key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] overflow-y-auto bg-[var(--scrim)] backdrop-blur-md" onClick={() => set({ project: null })}>
           <div className="flex min-h-full items-center justify-center p-3 sm:p-6">
             <motion.article
               ref={panel}

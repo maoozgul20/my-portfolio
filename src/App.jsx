@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useUI, journey, env } from './state/store'
 import { useScrollJourney } from './state/useScrollJourney'
+import { setHoloLight } from './world/util'
 import { Nav } from './ui/Nav'
 import { Loader, Fallback, ProjectModal, WorldBoundary } from './ui/Overlays'
 import { Hero, About, Projects, Skills, Experience, Research, Contact, Travel } from './ui/Sections'
@@ -13,7 +14,21 @@ const World = lazy(() => import('./world/World'))
 export default function App() {
   const ready = useUI((s) => s.ready)
   const webgl = useUI((s) => s.webgl)
+  const theme = useUI((s) => s.theme)
   useScrollJourney()
+
+  // Theme: restyle the page and ease the world between night and day.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'light' ? '#dff1fb' : '#030914')
+    try {
+      localStorage.setItem('theme', theme)
+    } catch {}
+    const to = theme === 'light' ? 1 : 0
+    setHoloLight(theme === 'light')
+    if (env.reduced) journey.light = to
+    else gsap.to(journey, { light: to, duration: 1.4, ease: 'power2.inOut', overwrite: 'auto' })
+  }, [theme])
 
   // Copy reveals: each section's lines arrive as its stop comes into view and
   // leave again on the way out, in either scroll direction.
