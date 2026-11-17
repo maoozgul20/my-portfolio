@@ -50,7 +50,6 @@ export function Explorer() {
     // The explorer keeps their own place on the path and walks toward where
     // the camera is, at walking pace, however fast the page is scrolled.
     const WALK = 4.2 // world units per second
-    const LEASH = 0.24 // furthest they may fall behind, in stations
     if (env.reduced || st.et === undefined) st.et = journey.t
     const gap = journey.t - st.et
     const dir = Math.sign(gap) || 1
@@ -58,9 +57,12 @@ export function Explorer() {
     pathAt(st.et + 0.01 * dir, ahead)
     const perT = Math.max(here.distanceTo(ahead) * 100, 1) // units per station here
     let step = Math.min(Math.abs(gap), (WALK * dt) / perT)
-    // too far behind (off screen): close the extra distance quickly
-    const excess = Math.abs(gap) - step - LEASH
-    if (excess > 0) step += excess * Math.min(1, dt * 6)
+    // Never drop out of the picture: the camera sits about 8 units behind its
+    // spot on the path, so trailing it is allowed only a short way (they jog to
+    // keep up); when the journey reverses they are ahead and may lag further.
+    const leash = (gap > 0 ? 1.6 : 6) / perT
+    const excess = Math.abs(gap) - step - leash
+    if (excess > 0) step += excess * Math.min(1, dt * 12)
     st.et += step * dir
     const t = st.et
 
@@ -71,7 +73,7 @@ export function Explorer() {
     const moving = Math.abs(gap) > 0.004 && !env.reduced
     st.walk = THREE.MathUtils.damp(st.walk, moving ? 1 : 0, 6, dt)
     // stride follows ground covered, capped at walking pace so legs never race
-    st.phase += Math.min(moved, WALK * dt * 1.15) * 1.5 * st.walk
+    st.phase += Math.min(moved, WALK * dt * 1.7) * 1.5 * st.walk
 
     // heading: along the path while walking; toward the display when stopped
     let want
